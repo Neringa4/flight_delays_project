@@ -1,0 +1,64 @@
+---
+title: "EDA"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+all_EWR <- read_csv("clean_data/all_EWR.csv")
+```
+
+
+# GENERAL DELAYS ANALYSIS
+
+```{r}
+all_EWR %>% 
+  group_by(delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(percent = n/sum(n))
+```
+
+```{r}
+all_EWR %>% 
+  ggplot(aes(x = delayed)) +
+  geom_bar()
+```
+
+```{r}
+all_EWR %>% 
+  filter(dep_delay > 0) %>% 
+  ggplot(aes(x = dep_delay)) +
+  geom_histogram()
+```
+
+```{r}
+all_EWR %>% 
+  filter(delayed == "Yes") %>% 
+  mutate(delay_period = case_when(
+    dep_delay < 10 ~ "< 10min",
+    dep_delay <= 60 ~ "10min - 60min",
+    dep_delay > 60 ~ "> 60min"
+  )) %>% 
+  group_by(delay_period) %>% 
+  summarise(n = n()) %>% 
+  mutate(percentage = n / sum(n))
+```
+
+```{r}
+all_EWR %>% 
+  filter(delayed == "Yes") %>% 
+  ggplot(aes(x = fct_inorder(month))) +
+  geom_bar()
+```
+
+```{r}
+all_EWR %>%
+  mutate(hour = if_else(hour == 1, 24, hour)) %>%
+  ggplot(aes(x = hour, fill = delayed)) +
+  geom_bar(position = "fill")
+```
+
+--------------------------------------------------------------------------------
