@@ -1,0 +1,131 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+airlines_raw <- read_csv("data/airlines.csv")
+airports_raw <- read_csv("data/airports.csv")
+flights_raw <- read_csv("data/flights.csv")
+planes_raw <- read_csv("data/planes.csv")
+weather_raw <- read_csv("data/weather.csv")
+```
+
+```{r}
+weather_raw %>%
+  filter(origin == "EWR") %>% 
+  summarise(across(.cols = everything(),
+                   .fns = ~sum(!is.na(.x))/8735*100))
+```
+
+```{r}
+flights_raw %>% 
+  filter(origin == "EWR") %>% 
+  dim()
+```
+
+```{r}
+flights_raw %>% 
+  filter(origin == "EWR") %>%
+  group_by(year, month, day) %>% 
+  count()
+```
+
+```{r}
+airports_raw %>% 
+  summarise(across(.cols = everything(),
+                   .fns = ~sum(is.na(.x))))
+```
+
+```{r}
+flights_raw %>% 
+  summarise(across(.cols = everything(),
+                   .fns = ~sum(is.na(.x))))
+```
+
+```{r}
+planes_raw %>% 
+  summarise(across(.cols = everything(),
+                   .fns = ~sum(is.na(.x))))
+```
+
+--------------------------------------------------------------------------------
+
+# CLEANING
+
+```{r}
+airlines <- airlines_raw %>% 
+  rename("airline_name" = "name")
+```
+
+```{r}
+flights <- flights_raw %>%
+  select(month, day, hour, dep_delay, carrier, flight, 
+         tailnum, origin, distance, time_hour) %>% 
+  drop_na() %>% 
+  mutate(delayed = if_else(dep_delay > 0, "Yes", "No"))
+```
+
+```{r}
+flights_EWR <- flights %>% 
+  filter(origin == "EWR") %>% 
+  select(-origin)
+```
+
+```{r}
+planes <- planes_raw %>% 
+  select(-speed)
+```
+
+```{r}
+weather <- weather_raw %>% 
+  select(-year, -month, -day, -hour)
+```
+
+```{r}
+weather_EWR <- weather %>% 
+  filter(origin == "EWR") %>% 
+  select(-origin)
+```
+
+--------------------------------------------------------------------------------
+
+# GENERAL DELAYS ANALYSIS
+```{r}
+flights_EWR %>% 
+  group_by(delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(total = sum(n)) %>% 
+  mutate(percent = n/total)
+
+flights_EWR %>% 
+  filter(delayed == "Yes") %>% 
+  mutate(delay_period = case_when(
+    dep_delay <= 10 ~ "< 10min",
+    dep_delay <= 30 ~ "10min - 30min",
+    dep_delay <= 60 ~ "30min - 60min",
+    dep_delay > 60 ~ "> 60min"
+  )) %>% 
+  group_by(delay_period) %>% 
+  summarise(n = n())
+```
+
+```{r}
+flights_EWR %>% 
+  ggplot(aes(x = delayed)) +
+  geom_bar()
+```
+
+```{r}
+flights_EWR %>% 
+  filter(dep_delay > 0) %>% 
+  ggplot(aes(x = dep_delay)) +
+  geom_bar() 
+```
+
+--------------------------------------------------------------------------------
+
