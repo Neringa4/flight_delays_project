@@ -73,6 +73,7 @@ flights <- flights_raw %>%
   select(month, day, hour, dep_delay, carrier, flight, 
          tailnum, origin, distance, time_hour) %>% 
   drop_na() %>% 
+  arrange(month) %>% 
   mutate(delayed = if_else(dep_delay > 0, "Yes", "No"),
          month = lubridate::month(month, label = TRUE, abbr = FALSE))
 ```
