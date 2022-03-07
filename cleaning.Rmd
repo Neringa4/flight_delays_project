@@ -63,11 +63,18 @@ airlines <- airlines_raw %>%
 ```
 
 ```{r}
+airports <- airports_raw %>% 
+  select(faa, name) %>% 
+  rename("airport_name" = "name")
+```
+
+```{r}
 flights <- flights_raw %>%
   select(month, day, hour, dep_delay, carrier, flight, 
          tailnum, origin, distance, time_hour) %>% 
   drop_na() %>% 
-  mutate(delayed = if_else(dep_delay > 0, "Yes", "No"))
+  mutate(delayed = if_else(dep_delay > 0, "Yes", "No"),
+         month = lubridate::month(month, label = TRUE, abbr = FALSE))
 ```
 
 ```{r}
@@ -91,3 +98,31 @@ weather_EWR <- weather %>%
   filter(origin == "EWR") %>% 
   select(-origin)
 ```
+
+--------------------------------------------------------------------------------
+
+# Joining 
+
+```{r}
+all <- flights %>% 
+  left_join(airlines, by = "carrier") %>% 
+  left_join(airports, by = c("origin" = "faa")) %>% 
+  left_join(weather, by = c("time_hour", "origin")) %>% 
+  left_join(planes, by = "tailnum")
+```
+
+```{r}
+all_EWR <- flights_EWR %>% 
+  left_join(airlines, by = "carrier") %>% 
+  left_join(weather_EWR, by = "time_hour") %>% 
+  left_join(planes, by = "tailnum")
+```
+
+--------------------------------------------------------------------------------
+
+```{r}
+write_csv(all_EWR, "clean_data/all_EWR.csv")
+write_csv(all, "clean_data/all.csv")
+```
+
+
