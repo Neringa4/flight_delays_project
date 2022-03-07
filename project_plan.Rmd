@@ -1,0 +1,64 @@
+---
+title: "Project Plan"
+output: html_notebook
+---
+
+--------------------------------------------------------------------------------
+PLAN
+--------------------------------------------------------------------------------
+Question: Investigate the effect of weather on Departure Delays in Newark
+---
+- What factors trigger delays?
+- How do weather related delays compare with other types of delays?
+- What type of weather causes most delays?
+- How does Newark airport compare with other New York airports?
+
+---
+
+Possible delay factors to investigate:
+
+- Airline
+- Busyness (total flights that day)
+- Time of Day/Week/Year
+- Destination
+- Flight distance
+- Plane e.g. (year made, manufacturer)
+- Weather (wind direction, wind speed, wind gust, visibility)
+
+--------------------------------------------------------------------------------
+APPROACH
+--------------------------------------------------------------------------------
+- Find more weather information? Only 2% of dataset contains info on temp, dewp, 
+humid, pressure and 5% on precip.
+---
+- Clean the datasets
+- Join datasets 
+- Look at summary statistics and correlations to understand and explore data
+- Prepare data for model building
+- Build model using logistic regression on flight delays (yes/no)
+- Model testing
+- Build model using linear regression on flight delays (length)
+- Model testing
+- Investigate how delays compare between airports using visualisations
+- Identify key insights and visualisations
+- Identify possible recommendations, limitations etc.
+- Identify challenges encountered and possible improvements with more time
+- Slides and presentation
+
+--------------------------------------------------------------------------------
+TIMELINE
+--------------------------------------------------------------------------------
+Rough guideline
+---
+| Day       | Task                                                |
+|:----------|:----------------------------------------------------|
+| Weekend   | Planning <br> Weather data                          |
+| Monday    | Present plan <br> Clean datasets <br> Join datasets |
+| Tuesday   | EDA                                                 |
+| Wednesday | EDA                                                 |
+| Thursday  | 1-to-1 check in with instructors <br> Prepare data for model building <br> Model building |
+| Friday    | Model Building and testing                          |
+| Weekend   | Model Building and testing                          |
+| Monday    | 1-to-1 check in with instructors <br> Key insights <br> Key visualisations <br> Recommendations |
+| Tuesday   | Slides and presentation                             |
+| Wednesday | PRESENTATION!!!                                     |
