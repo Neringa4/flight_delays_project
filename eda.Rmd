@@ -61,4 +61,27 @@ all_EWR %>%
   geom_bar(position = "fill")
 ```
 
+```{r}
+all_EWR %>% 
+  ggplot(aes(x = carrier, fill = delayed)) +
+  geom_bar(position = "fill")
+
+all_EWR %>% 
+filter(delayed == "Yes") %>% 
+  mutate(delay_period = case_when(
+    dep_delay < 10 ~ "< 10min",
+    dep_delay <= 60 ~ "10min - 60min",
+    dep_delay > 60 ~ "> 60min"
+  )) %>%
+  ggplot(aes(x = carrier, fill = delay_period)) +
+  geom_bar(position = "fill")
+```
+
+```{r}
+all_EWR %>% 
+  ggplot(aes(x = delayed, y = distance)) +
+  geom_boxplot()
+```
+
 --------------------------------------------------------------------------------
+
