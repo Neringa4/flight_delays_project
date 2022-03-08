@@ -85,6 +85,9 @@ all_EWR %>%
 
 --------------------------------------------------------------------------------
 
+
+# PLANE
+
 ```{r}
 all_EWR %>% 
   drop_na(year) %>% 
@@ -108,3 +111,83 @@ all_EWR %>%
 ```
 
 --------------------------------------------------------------------------------
+
+# WEATHER
+
+```{r}
+all_EWR %>% 
+  drop_na(temp) %>%
+  ggplot(aes(x = delayed, y = temp)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(dewp) %>%
+  ggplot(aes(x = delayed, y = dewp)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(humid) %>%
+  ggplot(aes(x = delayed, y = humid)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(precip) %>%
+  ggplot(aes(x = delayed, y = precip)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(pressure) %>%
+  ggplot(aes(x = delayed, y = pressure)) +
+  geom_boxplot()
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(wind_speed) %>%
+  ggplot(aes(x = delayed, y = wind_speed)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(wind_speed) %>%
+  ggplot(aes(x = as.factor(wind_speed), fill = delayed)) +
+  geom_bar(position = "fill")
+
+all_EWR %>% 
+  drop_na(wind_gust) %>%
+  ggplot(aes(x = delayed, y = wind_gust)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(wind_gust) %>%
+  ggplot(aes(x = as.factor(wind_gust), fill = delayed)) +
+  geom_bar(position = "fill")
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(visib) %>%
+  ggplot(aes(x = delayed, y = visib)) +
+  geom_boxplot()
+
+all_EWR %>% 
+  drop_na(visib) %>%
+  ggplot(aes(x = visib, y = dep_delay)) +
+  geom_point()
+
+all_EWR %>% 
+  drop_na(visib) %>%
+  ggplot(aes(x = as.factor(visib), fill = delayed)) +
+  geom_bar(position = "fill")
+
+all_EWR %>% 
+  drop_na(visib) %>%
+  filter(delayed == "Yes") %>% 
+  mutate(delay_period = case_when(
+    dep_delay < 10 ~ "< 10min",
+    dep_delay <= 60 ~ "10min - 60min",
+    dep_delay > 60 ~ "> 60min"
+  )) %>%
+  ggplot(aes(x = as.factor(visib), fill = delay_period)) +
+  geom_bar(position = "fill")
+```
+
