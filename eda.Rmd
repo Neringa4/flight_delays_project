@@ -85,3 +85,26 @@ all_EWR %>%
 
 --------------------------------------------------------------------------------
 
+```{r}
+all_EWR %>% 
+  drop_na(year) %>% 
+  filter(year != 0) %>% 
+  ggplot(aes(x = delayed, y = year)) +
+  geom_boxplot()
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(manufacturer) %>% 
+  ggplot(aes(x = manufacturer, fill = delayed)) +
+  geom_bar() +
+  coord_flip()
+
+all_EWR %>% 
+  drop_na(manufacturer) %>% 
+  ggplot(aes(x = manufacturer, fill = delayed)) +
+  geom_bar(position = "fill") +
+  coord_flip()
+```
+
+--------------------------------------------------------------------------------
