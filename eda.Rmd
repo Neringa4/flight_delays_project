@@ -48,10 +48,9 @@ all_EWR %>%
 ```
 
 ```{r}
-all_EWR %>% 
-  filter(delayed == "Yes") %>% 
-  ggplot(aes(x = fct_inorder(month))) +
-  geom_bar()
+all_EWR %>%
+  ggplot(aes(x = fct_inorder(month), fill = delayed)) +
+  geom_bar(position = "fill")
 ```
 
 ```{r}
@@ -150,7 +149,7 @@ all_EWR %>%
 all_EWR %>% 
   drop_na(wind_speed) %>%
   ggplot(aes(x = as.factor(wind_speed), fill = delayed)) +
-  geom_bar(position = "fill")
+  geom_bar()
 
 all_EWR %>% 
   drop_na(wind_gust) %>%
@@ -189,5 +188,23 @@ all_EWR %>%
   )) %>%
   ggplot(aes(x = as.factor(visib), fill = delay_period)) +
   geom_bar(position = "fill")
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(visib) %>% 
+  mutate(visib_less_10 = if_else(visib < 10, TRUE, FALSE)) %>% 
+  group_by(visib_less_10) %>% 
+  summarise(n = n()) %>% 
+  mutate(n/sum(n))
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(visib) %>%
+  mutate(visib_less_2 = if_else(visib < 2, TRUE, FALSE)) %>% 
+  group_by(visib_less_2) %>% 
+  summarise(n = n()) %>% 
+  mutate(n/sum(n))
 ```
 
