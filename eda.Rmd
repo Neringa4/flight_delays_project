@@ -85,6 +85,17 @@ all_EWR %>%
 ```
 
 ```{r}
+flights_by_day <- all_EWR %>% 
+  group_by(month, day) %>% 
+  summarise(num_delays = sum(delayed),
+            total_flights = n())
+
+flights_by_day %>% 
+  ggplot(aes(x = total_flights, y = num_delays)) +
+  geom_point()
+```
+
+```{r}
 all_EWR %>% 
   ggplot(aes(x = carrier, fill = delayed)) +
   geom_bar(position = "fill")
