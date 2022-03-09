@@ -36,7 +36,7 @@ all_EWR %>%
 
 ```{r}
 all_EWR %>% 
-  filter(delayed == "Yes") %>% 
+  filter(delayed == TRUE) %>% 
   mutate(delay_period = case_when(
     dep_delay < 10 ~ "< 10min",
     dep_delay <= 60 ~ "10min - 60min",
@@ -48,16 +48,40 @@ all_EWR %>%
 ```
 
 ```{r}
+month_plot_text <- all_EWR %>% 
+  group_by(month, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = round(n / sum(n) * 100)) %>% 
+  filter(delayed == TRUE)
+```
+
+```{r}
 all_EWR %>%
   ggplot(aes(x = fct_inorder(month), fill = delayed)) +
-  geom_bar(position = "fill")
+  geom_bar(position = "fill") +
+  geom_text(aes(y = delay_percent/100 - 0.03, 
+                label = str_c(delay_percent, "%")), 
+            data = month_plot_text)
+```
+
+```{r}
+hour_plot_text <- all_EWR %>%
+  mutate(hour = if_else(hour == 1, 24, hour)) %>%
+  group_by(hour, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = round(n / sum(n) * 100)) %>% 
+  filter(delayed == TRUE)
 ```
 
 ```{r}
 all_EWR %>%
   mutate(hour = if_else(hour == 1, 24, hour)) %>%
   ggplot(aes(x = hour, fill = delayed)) +
-  geom_bar(position = "fill")
+  geom_bar(position = "fill") +
+  geom_text(aes(y = delay_percent/100 - 0.03, 
+                label = str_c(delay_percent, "%")), 
+            data = hour_plot_text,
+            size = 3)
 ```
 
 ```{r}
@@ -66,7 +90,7 @@ all_EWR %>%
   geom_bar(position = "fill")
 
 all_EWR %>% 
-filter(delayed == "Yes") %>% 
+filter(delayed == TRUE) %>% 
   mutate(delay_period = case_when(
     dep_delay < 10 ~ "< 10min",
     dep_delay <= 60 ~ "10min - 60min",
@@ -180,7 +204,7 @@ all_EWR %>%
 
 all_EWR %>% 
   drop_na(visib) %>%
-  filter(delayed == "Yes") %>% 
+  filter(delayed == TRUE) %>% 
   mutate(delay_period = case_when(
     dep_delay < 10 ~ "< 10min",
     dep_delay <= 60 ~ "10min - 60min",
