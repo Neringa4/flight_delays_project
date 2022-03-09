@@ -87,12 +87,13 @@ all_EWR %>%
 ```{r}
 flights_by_day <- all_EWR %>% 
   group_by(month, day) %>% 
-  summarise(num_delays = sum(delayed),
+  summarise(percentage_delays = sum(delayed) / n() * 100,
             total_flights = n())
 
 flights_by_day %>% 
-  ggplot(aes(x = total_flights, y = num_delays)) +
-  geom_point()
+  ggplot(aes(x = total_flights, y = percentage_delays)) +
+  geom_point() +
+  geom_smooth(method = "lm", se = FALSE)
 ```
 
 ```{r}
