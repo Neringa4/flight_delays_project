@@ -53,6 +53,11 @@ planes_raw %>%
                    .fns = ~sum(is.na(.x))))
 ```
 
+```{r}
+flights_raw %>% 
+  filter(dest == "EWR")
+```
+
 --------------------------------------------------------------------------------
 
 # CLEANING
@@ -68,13 +73,16 @@ airports <- airports_raw %>%
   rename("airport_name" = "name")
 ```
 
+"The Federal Aviation Administration (FAA) considers a flight to be delayed when 
+it is 15 minutes later than its scheduled time."
+
 ```{r}
 flights <- flights_raw %>%
   select(month, day, hour, dep_delay, carrier, flight, 
          tailnum, origin, distance, time_hour) %>% 
   drop_na() %>% 
   arrange(month) %>% 
-  mutate(delayed = if_else(dep_delay > 0, TRUE, FALSE),
+  mutate(delayed = if_else(dep_delay >= 15, TRUE, FALSE),
          month = lubridate::month(month, label = TRUE, abbr = FALSE))
 ```
 
