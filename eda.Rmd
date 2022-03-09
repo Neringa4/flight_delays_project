@@ -29,7 +29,7 @@ all_EWR %>%
 
 ```{r}
 all_EWR %>% 
-  filter(dep_delay > 0) %>% 
+  filter(dep_delay >= 15) %>% 
   ggplot(aes(x = dep_delay)) +
   geom_histogram()
 ```
@@ -185,7 +185,7 @@ all_EWR %>%
 all_EWR %>% 
   drop_na(wind_speed) %>%
   ggplot(aes(x = as.factor(wind_speed), fill = delayed)) +
-  geom_bar()
+  geom_bar(position = "fill")
 
 all_EWR %>% 
   drop_na(wind_gust) %>%
@@ -242,5 +242,12 @@ all_EWR %>%
   group_by(visib_less_2) %>% 
   summarise(n = n()) %>% 
   mutate(n/sum(n))
+```
+
+```{r}
+all_EWR %>% 
+  filter(visib < 1) %>% 
+  arrange(visib) %>% 
+  select(dep_delay, delayed, visib, engines)
 ```
 
