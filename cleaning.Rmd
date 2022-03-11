@@ -83,6 +83,7 @@ flights <- flights_raw %>%
   drop_na() %>% 
   arrange(month) %>% 
   mutate(delayed = if_else(dep_delay >= 15, TRUE, FALSE),
+         weekday = weekdays(time_hour),
          month = lubridate::month(month, label = TRUE, abbr = FALSE))
 ```
 
