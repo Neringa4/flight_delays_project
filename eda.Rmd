@@ -9,6 +9,7 @@ library(tidyverse)
 
 ```{r}
 all_EWR <- read_csv("clean_data/all_EWR.csv")
+all <- read_csv("clean_data/all.csv")
 ```
 
 
@@ -82,6 +83,12 @@ all_EWR %>%
                 label = str_c(delay_percent, "%")), 
             data = hour_plot_text,
             size = 3)
+```
+
+```{r}
+all_EWR %>% 
+  ggplot(aes(x = weekday, fill = delayed)) +
+  geom_bar(position = "fill")
 ```
 
 ```{r}
@@ -177,26 +184,29 @@ all_EWR %>%
 ```
 
 ```{r}
-all_EWR %>% 
+all %>% 
   drop_na(wind_speed) %>%
   ggplot(aes(x = delayed, y = wind_speed)) +
   geom_boxplot()
 
-all_EWR %>% 
+all %>% 
   drop_na(wind_speed) %>%
-  ggplot(aes(x = as.factor(wind_speed), fill = delayed)) +
-  geom_bar(position = "fill")
+  ggplot(aes(x = wind_speed, y = dep_delay)) +
+  geom_point()
 
 all_EWR %>% 
   drop_na(wind_gust) %>%
   ggplot(aes(x = delayed, y = wind_gust)) +
   geom_boxplot()
 
-all_EWR %>% 
+all %>% 
+  mutate(delayed = if_else(dep_delay > 15, TRUE, FALSE)) %>% 
   drop_na(wind_gust) %>%
   ggplot(aes(x = as.factor(wind_gust), fill = delayed)) +
   geom_bar(position = "fill")
 ```
+
+
 
 ```{r}
 all_EWR %>% 
@@ -204,7 +214,7 @@ all_EWR %>%
   ggplot(aes(x = delayed, y = visib)) +
   geom_boxplot()
 
-all_EWR %>% 
+all %>% 
   drop_na(visib) %>%
   ggplot(aes(x = visib, y = dep_delay)) +
   geom_point()
