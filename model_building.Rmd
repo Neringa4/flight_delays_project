@@ -1,0 +1,33 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+```
+
+```{r}
+all_EWR <- read_csv("clean_data/all_EWR.csv")
+```
+
+```{r}
+all_EWR_tidy <- all_EWR %>% 
+  select(month, weekday, hour, carrier, delayed, wind_dir, wind_speed, 
+         wind_gust, visib, year, manufacturer) %>% 
+  drop_na()
+```
+
+```{r}
+alias(delayed ~ ., data = all_EWR_tidy)
+```
+
+```{r}
+all_EWR_tidy <- all_EWR_tidy %>% 
+  select(-wind_gust)
+```
+
+```{r}
+GGally::ggpairs(all_EWR_tidy %>% select(-manufacturer))
+```
+
