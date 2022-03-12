@@ -5,6 +5,8 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(pROC)
+library(glmulti)
 ```
 
 ```{r}
@@ -15,7 +17,8 @@ all_EWR <- read_csv("clean_data/all_EWR.csv")
 all_EWR_tidy <- all_EWR %>% 
   select(month, weekday, hour, carrier, delayed, wind_dir, wind_speed, 
          wind_gust, visib, year, manufacturer) %>% 
-  drop_na()
+  drop_na() %>% 
+  mutate(across(c(month, weekday, carrier, manufacturer), ~as.factor(.x)))
 ```
 
 ```{r}
@@ -31,3 +34,74 @@ all_EWR_tidy <- all_EWR_tidy %>%
 GGally::ggpairs(all_EWR_tidy %>% select(-manufacturer))
 ```
 
+```{r}
+mod <- glm(delayed ~ ., data = all_EWR_tidy, family = binomial(link = "logit"))
+```
+
+```{r}
+summary(mod)
+```
+
+```{r}
+all_EWR_tidy %>% 
+  modelr::add_predictions(mod, type = "response") %>% 
+  roc(response = delayed, predictor = pred) %>% 
+  ggroc(legacy.axes = TRUE) +
+  coord_fixed()
+```
+
+# LOGISTIC REGRESSION
+
+```{r}
+glmulti_search_all_mains <- glmulti(
+  delayed ~ ., 
+  data = all_EWR_tidy,
+  level = 1,               # No interactions considered, main effects only
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit"))
+```
+
+Best model: delayed~1+month+weekday+carrier+hour+wind_speed+visib
+
+```{r}
+glmulti_search_previous_mains_one_pair <- glmulti(
+  delayed ~ month + weekday + carrier + hour + wind_speed + visib, 
+  data = all_EWR_tidy,
+  level = 2,               # Interactions considered
+  method = "h",            # Exhaustive approach
+  crit = "bic",            # BIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  minsize = 7,             # minsize, maxsize and marginality here force 
+  maxsize = 7,             # inclusion of a single pair beyond the five main effects
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+```
+
+Best model: delayed~1+month+weekday+carrier+hour+visib+weekday:month+carrier:hour
+
+```{r}
+glmulti_ga_search_with_pairs_aic <- glmulti(
+  delayed ~ ., 
+  data = all_EWR_tidy,
+  level = 2,               # Interactions considered
+  method = "h",            # Genetic algorithm approach
+  crit = "aic",            # AIC as criteria
+  confsetsize = 10,        # Keep 10 best models
+  marginality = TRUE,      # consider pairs only if both main effects in model
+  plotty = F, 
+  report = T,              # No plots, but provide interim reports
+  fitfunction = "glm",     # glm function
+  family = binomial(link = "logit")) # binomial family for logistic regression
+```
+
+Best model: delayed~1+month+hour+wind_dir+wind_speed+visib+wind_dir:hour+
+wind_speed:hour+visib:hour+visib:wind_speed+month:hour+month:wind_dir+
+month:wind_speed+month:visib
