@@ -14,7 +14,7 @@ all_EWR <- read_csv("clean_data/all_EWR.csv")
 ```
 
 ```{r}
-all_EWR_tidy <- all_EWR %>% 
+all_EWR_log <- all_EWR %>% 
   select(month, weekday, hour, carrier, delayed, wind_dir, wind_speed, 
          wind_gust, visib, year, manufacturer) %>% 
   drop_na() %>% 
@@ -22,40 +22,26 @@ all_EWR_tidy <- all_EWR %>%
 ```
 
 ```{r}
-alias(delayed ~ ., data = all_EWR_tidy)
+alias(delayed ~ ., data = all_EWR_log)
 ```
 
 ```{r}
-all_EWR_tidy <- all_EWR_tidy %>% 
+all_EWR_log <- all_EWR_log %>% 
   select(-wind_gust)
 ```
 
 ```{r}
-GGally::ggpairs(all_EWR_tidy %>% select(-manufacturer))
+GGally::ggpairs(all_EWR_log %>% select(-manufacturer))
 ```
 
-```{r}
-mod <- glm(delayed ~ ., data = all_EWR_tidy, family = binomial(link = "logit"))
-```
-
-```{r}
-summary(mod)
-```
-
-```{r}
-all_EWR_tidy %>% 
-  modelr::add_predictions(mod, type = "response") %>% 
-  roc(response = delayed, predictor = pred) %>% 
-  ggroc(legacy.axes = TRUE) +
-  coord_fixed()
-```
+--------------------------------------------------------------------------------
 
 # LOGISTIC REGRESSION
 
 ```{r}
 glmulti_search_all_mains <- glmulti(
   delayed ~ ., 
-  data = all_EWR_tidy,
+  data = all_EWR_log,
   level = 1,               # No interactions considered, main effects only
   method = "h",            # Exhaustive approach
   crit = "bic",            # BIC as criteria
@@ -71,7 +57,7 @@ Best model: delayed~1+month+weekday+carrier+hour+wind_speed+visib
 ```{r}
 glmulti_search_previous_mains_one_pair <- glmulti(
   delayed ~ month + weekday + carrier + hour + wind_speed + visib, 
-  data = all_EWR_tidy,
+  data = all_EWR_log,
   level = 2,               # Interactions considered
   method = "h",            # Exhaustive approach
   crit = "bic",            # BIC as criteria
@@ -90,7 +76,7 @@ Best model: delayed~1+month+weekday+carrier+hour+visib+weekday:month+carrier:hou
 ```{r}
 glmulti_ga_search_with_pairs_aic <- glmulti(
   delayed ~ ., 
-  data = all_EWR_tidy,
+  data = all_EWR_log,
   level = 2,               # Interactions considered
   method = "h",            # Genetic algorithm approach
   crit = "aic",            # AIC as criteria
@@ -105,3 +91,68 @@ glmulti_ga_search_with_pairs_aic <- glmulti(
 Best model: delayed~1+month+hour+wind_dir+wind_speed+visib+wind_dir:hour+
 wind_speed:hour+visib:hour+visib:wind_speed+month:hour+month:wind_dir+
 month:wind_speed+month:visib
+
+--------------------------------------------------------------------------------
+
+# LINEAR REGRESSION
+
+```{r}
+all_EWR_lin <- all_EWR %>% 
+  select(month, weekday, hour, dep_delay, carrier, wind_dir,
+         wind_speed, visib, year, manufacturer) %>% 
+  drop_na() %>% 
+  mutate(across(c(month, weekday, carrier, manufacturer), ~as.factor(.x)))
+```
+
+```{r}
+regsubsets_forward <- regsubsets(dep_delay ~ ., 
+                                 data = all_EWR_lin,
+                                 nvmax = 80,
+                                 method = "forward")
+```
+
+```{r}
+summary(regsubsets_forward)
+```
+
+```{r}
+plot(regsubsets_forward, scale = "adjr2")
+plot(regsubsets_forward, scale = "bic")
+plot(summary(regsubsets_forward)$rsq, type = "b")
+plot(summary(regsubsets_forward)$bic, type = "b")
+```
+
+```{r}
+summary(regsubsets_forward)$which[12,]
+```
+
+```{r}
+mod_1 <- lm(dep_delay ~ hour + wind_speed + visib, data = all_EWR_lin)
+mod_month <- lm(dep_delay ~ hour + wind_speed + visib + month, 
+                data = all_EWR_lin)
+anova(mod_1, mod_month)
+```
+
+```{r}
+mod_weekday <- lm(dep_delay ~ hour + wind_speed + visib + month + weekday, 
+                data = all_EWR_lin)
+anova(mod_month, mod_weekday)
+```
+
+```{r}
+mod_carrier <- lm(dep_delay ~ hour + wind_speed + visib + 
+                    month + weekday + carrier, 
+                data = all_EWR_lin)
+anova(mod_weekday, mod_carrier)
+```
+
+```{r}
+mod_manufacturer <- lm(dep_delay ~ hour + wind_speed + visib + 
+                    month + weekday + carrier + manufacturer, 
+                data = all_EWR_lin)
+anova(mod_carrier, mod_manufacturer)
+```
+
+```{r}
+summary(mod_manufacturer)
+```
