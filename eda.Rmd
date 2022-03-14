@@ -184,6 +184,13 @@ all_EWR %>%
 ```
 
 ```{r}
+all_EWR %>% 
+  drop_na(wind_dir) %>% 
+  ggplot(aes(x = wind_dir, fill = delayed)) +
+  geom_bar(position = "fill")
+```
+
+```{r}
 all %>% 
   drop_na(wind_speed) %>%
   ggplot(aes(x = delayed, y = wind_speed)) +
