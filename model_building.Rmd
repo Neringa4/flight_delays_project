@@ -7,6 +7,9 @@ output: html_notebook
 library(tidyverse)
 library(pROC)
 library(glmulti)
+library(ggfortify)
+library(janitor)
+library(pROC)
 ```
 
 ```{r}
@@ -75,13 +78,47 @@ glmulti_search_previous_mains_one_pair <- glmulti(
 
 Best model: delayed~1+month+weekday+carrier+hour+visib+weekday:month+carrier:hour
 
+```{r}
+mod_log <- glm(delayed ~ month + weekday + carrier + wind_dir + hour + 
+                 wind_speed + visib,
+               data = all_EWR_log, 
+               family = binomial(link = "logit"))
+```
+
+```{r}
+log_mod_pred <- all_EWR_log %>% 
+  modelr::add_predictions(mod_log, type = "response") %>% 
+  mutate(pred_thresh_0.5 = pred >= 0.5)
+```
+
+```{r}
+summary(mod_log)
+```
+
+```{r}
+conf_table <- log_mod_pred %>% 
+  tabyl(delayed, pred_thresh_0.5)
+conf_table
+```
+
+```{r}
+roc_mod_log <- log_mod_pred %>% 
+  roc(response = delayed, predictor = pred)
+roc_mod_log %>% 
+  ggroc() +
+  coord_fixed()
+```
+
+```{r}
+auc(roc_mod_log)
+```
+
 --------------------------------------------------------------------------------
 
 # LINEAR REGRESSION
 
 ```{r}
 all_EWR_lin <- all_EWR %>% 
-  filter(dep_delay > 15) %>% 
   select(month, weekday, hour, dep_delay, carrier, wind_dir,
          wind_speed, visib, year, manufacturer) %>% 
   drop_na() %>% 
@@ -109,7 +146,7 @@ plot(summary(regsubsets_forward)$bic, type = "b")
 ```
 
 ```{r}
-summary(regsubsets_forward)$which[12,]
+summary(regsubsets_forward)$which[15,]
 ```
 
 ```{r}
@@ -149,3 +186,8 @@ anova(mod_manufacturer, mod_wind_dir)
 ```{r}
 summary(mod_wind_dir)
 ```
+
+```{r}
+autoplot(mod_wind_dir)
+```
+
