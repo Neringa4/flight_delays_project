@@ -10,6 +10,7 @@ library(glmulti)
 library(ggfortify)
 library(janitor)
 library(pROC)
+library(modelr)
 ```
 
 ```{r}
@@ -86,19 +87,12 @@ mod_log <- glm(delayed ~ month + weekday + carrier + wind_dir + hour +
 ```
 
 ```{r}
-log_mod_pred <- all_EWR_log %>% 
-  modelr::add_predictions(mod_log, type = "response") %>% 
-  mutate(pred_thresh_0.5 = pred >= 0.5)
-```
-
-```{r}
 summary(mod_log)
 ```
 
 ```{r}
-conf_table <- log_mod_pred %>% 
-  tabyl(delayed, pred_thresh_0.5)
-conf_table
+log_mod_pred <- all_EWR_log %>% 
+  add_predictions(mod_log, type = "response")
 ```
 
 ```{r}
@@ -111,6 +105,75 @@ roc_mod_log %>%
 
 ```{r}
 auc(roc_mod_log)
+```
+
+```{r}
+caret::varImp(mod_log, scale = TRUE)
+```
+
+Best model: delayed~1+month+weekday+carrier+wind_dir+hour+wind_speed+visib
+
+```{r}
+log_mod_month <- glm(delayed ~ month,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_weekday <- glm(delayed ~ weekday,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_carrier <- glm(delayed ~ carrier,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_wind_dir <- glm(delayed ~ wind_dir,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_hour <- glm(delayed ~ hour,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_wind_speed <- glm(delayed ~ wind_speed,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+log_mod_visib <- glm(delayed ~ visib,
+                     data = all_EWR_log, 
+                     family = binomial(link = "logit"))
+```
+
+```{r}
+roc_month <- all_EWR_log %>% 
+  add_predictions(log_mod_month, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_weekday <- all_EWR_log %>% 
+  add_predictions(log_mod_weekday, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_carrier <- all_EWR_log %>% 
+  add_predictions(log_mod_carrier, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_wind_dir <- all_EWR_log %>% 
+  add_predictions(log_mod_wind_dir, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_hour <- all_EWR_log %>% 
+  add_predictions(log_mod_hour, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_wind_speed <- all_EWR_log %>% 
+  add_predictions(log_mod_wind_speed, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+roc_visib <- all_EWR_log %>% 
+  add_predictions(log_mod_visib, type = "response") %>% 
+  roc(response = delayed, predictor = pred)
+```
+
+```{r}
+ggroc(data = list(roc_month, roc_weekday, roc_carrier,
+                  roc_wind_dir, roc_hour, roc_wind_speed, 
+                  roc_visib)) +
+  coord_fixed()
+```
+
+```{r}
+for(x in list(roc_month, roc_weekday, roc_carrier,
+                  roc_wind_dir, roc_hour, roc_wind_speed, 
+                  roc_visib)){
+  print(auc(x))
+                  }
 ```
 
 --------------------------------------------------------------------------------
