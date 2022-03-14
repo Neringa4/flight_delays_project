@@ -176,6 +176,10 @@ for(x in list(roc_month, roc_weekday, roc_carrier,
                   }
 ```
 
+```{r}
+
+```
+
 --------------------------------------------------------------------------------
 
 # LINEAR REGRESSION
@@ -252,5 +256,22 @@ summary(mod_wind_dir)
 
 ```{r}
 autoplot(mod_wind_dir)
+```
+
+--------------------------------------------------------------------------------
+
+# PLOTS FOR SLIDES
+
+```{r}
+roc_mod_log %>% 
+  ggroc(colour = "#55747e") +
+  coord_fixed() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_line(colour = "white"),
+        panel.background = element_rect(fill = "#c7d0d8"),
+        plot.background = element_rect(fill = "#c7d0d8")) +
+  theme(axis.ticks.y = element_blank(),
+        axis.text = element_text(size = 10, colour = "grey10"))
+#ggsave("ROC_curve.png")
 ```
 

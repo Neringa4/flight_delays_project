@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(extrafont)
 ```
 
 ```{r}
@@ -19,7 +20,7 @@ all <- read_csv("clean_data/all.csv")
 all_EWR %>% 
   group_by(delayed) %>% 
   summarise(n = n()) %>% 
-  mutate(percent = n/sum(n))
+  mutate(percent = n/sum(n)*100)
 ```
 
 ```{r}
@@ -264,3 +265,58 @@ all_EWR %>%
   select(dep_delay, delayed, visib, engines)
 ```
 
+--------------------------------------------------------------------------------
+
+# PLOTS FOR SLIDES
+
+```{r}
+percent_delayed <- all_EWR %>% 
+  group_by(delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(percent = round(n/sum(n)*100, digits = 2))
+```
+
+```{r}
+percent_delayed %>% 
+  ggplot(aes(x = delayed, y = percent)) +
+  geom_col(fill = "#55747e", width = 0.7) + 
+  geom_hline(yintercept = 0, color = "black", size = 0.8) +
+  geom_text(aes(y = percent, label = str_c(percent, "%")), 
+            data = percent_delayed, nudge_y = -5, 
+            size = 6, colour = "white") +
+  scale_x_discrete(labels = c("On Time", "Delayed")) +
+  scale_y_continuous(limits = c(0, 100)) +
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text.y = element_blank(),
+        axis.text.x = element_text(size = 12, colour = "black"),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = "grey80"),
+        panel.background = element_rect(fill = "#ecfafd"),
+        plot.background = element_rect(fill = "#ecfafd"))
+#ggsave("delay_percentage.png")
+```
+
+```{r}
+all_EWR %>%
+  group_by(hour, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = n / sum(n)) %>% 
+  filter(delayed == TRUE) %>% 
+  ggplot(aes(x = hour, y = delay_percent)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 1), 
+                     breaks = c(0, 0.2, 0.4, 0.6, 0.8, 1),
+                     labels = scales::percent) +
+  scale_x_continuous(breaks = c(5:24)) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(colour = "#6A838B"),
+        panel.background = element_rect(fill = "#55747e"),
+        plot.background = element_rect(fill = "#55747e")) +
+  theme(axis.ticks = element_blank(),
+        axis.title.y = element_blank(),
+        axis.text = element_text(size = 10, colour = "white"))
+#ggsave("hourly_delay_percentage.png")
+```
