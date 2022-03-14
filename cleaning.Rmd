@@ -100,7 +100,25 @@ planes <- planes_raw %>%
 
 ```{r}
 weather <- weather_raw %>% 
-  select(-year, -month, -day, -hour)
+  select(-year, -month, -day, -hour) %>% 
+  mutate(wind_dir = case_when(
+    wind_dir %in% c(350, 360, 0, 10) ~ "N",
+    wind_dir %in% c(20, 30) ~ "N/NE",
+    wind_dir %in% c(40, 50) ~ "NE",
+    wind_dir %in% c(60, 70) ~ "E/NE",
+    wind_dir %in% c(80, 90, 100) ~ "E",
+    wind_dir %in% c(110, 120) ~ "E/SE",
+    wind_dir %in% c(130, 140) ~ "SE",
+    wind_dir %in% c(150, 160) ~ "S/SE",
+    wind_dir %in% c(170, 180, 190) ~ "S",
+    wind_dir %in% c(200, 210) ~ "S/SW",
+    wind_dir %in% c(220, 230) ~ "SW",
+    wind_dir %in% c(240, 250) ~ "W/SW",
+    wind_dir %in% c(260, 270, 280) ~ "W",
+    wind_dir %in% c(290, 300) ~ "W/NW",
+    wind_dir %in% c(310, 320) ~ "NW",
+    wind_dir %in% c(330, 340) ~ "N/NW",
+  ))
 ```
 
 ```{r}
