@@ -67,7 +67,6 @@ all_EWR %>%
 
 ```{r}
 hour_plot_text <- all_EWR %>%
-  mutate(hour = if_else(hour == 1, 24, hour)) %>%
   group_by(hour, delayed) %>% 
   summarise(n = n()) %>% 
   mutate(delay_percent = round(n / sum(n) * 100)) %>% 
@@ -76,7 +75,6 @@ hour_plot_text <- all_EWR %>%
 
 ```{r}
 all_EWR %>%
-  mutate(hour = if_else(hour == 1, 24, hour)) %>%
   ggplot(aes(x = hour, fill = delayed)) +
   geom_bar(position = "fill") +
   geom_text(aes(y = delay_percent/100 - 0.03, 
@@ -212,8 +210,6 @@ all %>%
   ggplot(aes(x = as.factor(wind_gust), fill = delayed)) +
   geom_bar(position = "fill")
 ```
-
-
 
 ```{r}
 all_EWR %>% 

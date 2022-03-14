@@ -23,6 +23,12 @@ weather_raw %>%
 ```
 
 ```{r}
+weather_raw %>% 
+  ggplot(aes(x = wind_speed, y = wind_gust)) +
+  geom_point()
+```
+
+```{r}
 flights_raw %>% 
   filter(origin == "EWR") %>% 
   dim()
@@ -78,6 +84,7 @@ it is 15 minutes later than its scheduled time."
 
 ```{r}
 flights <- flights_raw %>%
+  mutate(hour = if_else(hour == 1, 24, hour)) %>%
   select(month, day, hour, dep_delay, carrier, flight, 
          tailnum, origin, distance, time_hour) %>% 
   drop_na() %>% 
@@ -152,5 +159,4 @@ all_EWR <- flights_EWR %>%
 write_csv(all_EWR, "clean_data/all_EWR.csv")
 write_csv(all, "clean_data/all.csv")
 ```
-
 
