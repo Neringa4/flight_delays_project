@@ -278,21 +278,6 @@ autoplot(mod_wind_dir)
 # RANDOM FOREST MODEL
 
 ```{r}
-rf <- train(dep_delay ~., data =all_EWR_lin, 
-      method = "rf",
-      trControl = trainControl(method = "oob"),
-      importance = TRUE,
-      verbose = TRUE,
-      tuneGrid = data.frame(mtry = 2) )
-```
-
-```{r}
-rf2 <- randomForest(delayed ~., 
-                    data = all_EWR_log,
-                    ntree = 100)
-```
-
-```{r}
 rf_classifier <- ranger(delayed ~ ., 
                         data = all_EWR_log,
                         importance = "impurity",
@@ -325,5 +310,22 @@ roc_mod_log %>%
   theme(axis.ticks.y = element_blank(),
         axis.text = element_text(size = 10, colour = "grey10"))
 #ggsave("ROC_curve.png")
+```
+
+```{r}
+ranger::importance(rf_classifier) %>% 
+broom::tidy() %>% 
+  arrange(desc(x)) %>% 
+  ggplot(aes(x = x, y = reorder(names, x))) +
+  geom_point() +
+  scale_x_continuous(limits = c(0, 5800),
+                     breaks = seq(0, 6000, 1000)) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major.y = element_line(colour = "white"),
+        panel.background = element_rect(fill = "#c7d0d8"),
+        plot.background = element_rect(fill = "#c7d0d8")) +
+  theme(axis.title = element_blank(),
+        axis.text.x = element_text(size = 10, colour = "grey10"))
+#ggsave("variable_importance.png")
 ```
 

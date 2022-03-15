@@ -112,16 +112,6 @@ flights_by_day %>%
 all_EWR %>% 
   ggplot(aes(x = carrier, fill = delayed)) +
   geom_bar(position = "fill")
-
-all_EWR %>% 
-filter(delayed == TRUE) %>% 
-  mutate(delay_period = case_when(
-    dep_delay < 10 ~ "< 10min",
-    dep_delay <= 60 ~ "10min - 60min",
-    dep_delay > 60 ~ "> 60min"
-  )) %>%
-  ggplot(aes(x = carrier, fill = delay_period)) +
-  geom_bar(position = "fill")
 ```
 
 ```{r}
@@ -233,17 +223,6 @@ all_EWR %>%
   drop_na(visib) %>%
   ggplot(aes(x = as.factor(visib), fill = delayed)) +
   geom_bar(position = "fill")
-
-all_EWR %>% 
-  drop_na(visib) %>%
-  filter(delayed == TRUE) %>% 
-  mutate(delay_period = case_when(
-    dep_delay < 10 ~ "< 10min",
-    dep_delay <= 60 ~ "10min - 60min",
-    dep_delay > 60 ~ "> 60min"
-  )) %>%
-  ggplot(aes(x = as.factor(visib), fill = delay_period)) +
-  geom_bar(position = "fill")
 ```
 
 ```{r}
@@ -353,5 +332,51 @@ percent_delayed_all %>%
         panel.background = element_rect(fill = "#ecfafd"),
         plot.background = element_rect(fill = "#ecfafd"))
 ggsave("all_delay_percentages.png")
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(wind_speed) %>%
+  group_by(wind_speed, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = n / sum(n)) %>% 
+  filter(delayed == TRUE) %>%
+  ggplot(aes(x = wind_speed, y = delay_percent)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 1),
+                     labels = scales::percent) +
+  scale_x_continuous(breaks = seq(0, 26, 2)) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(colour = "#A7C5CD"),
+        panel.background = element_rect(fill = "#799DA6"),
+        plot.background = element_rect(fill = "#799DA6")) +
+  theme(axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 10, colour = "white"))
+#ggsave("wind_speed.png")
+```
+
+```{r}
+all_EWR %>% 
+  drop_na(visib) %>%
+  group_by(visib, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = n / sum(n)) %>% 
+  filter(delayed == TRUE) %>%
+  ggplot(aes(x = visib, y = delay_percent)) +
+  geom_line() +
+  geom_point() +
+  scale_y_continuous(limits = c(0, 1),
+                     labels = scales::percent) +
+  scale_x_continuous(breaks = 0:10) +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(colour = "#ECFAFD"),
+        panel.background = element_rect(fill = "#C7D0D8"),
+        plot.background = element_rect(fill = "#C7D0D8")) +
+  theme(axis.ticks = element_blank(),
+        axis.title = element_blank(),
+        axis.text = element_text(size = 10, colour = "#191919"))
+ggsave("visibility.png")
 ```
 
