@@ -11,6 +11,9 @@ library(ggfortify)
 library(janitor)
 library(pROC)
 library(modelr)
+library(ranger)
+library(randomForest)
+library(caret)
 ```
 
 ```{r}
@@ -177,7 +180,19 @@ for(x in list(roc_month, roc_weekday, roc_carrier,
 ```
 
 ```{r}
+all_EWR_log_scaled <- all_EWR_log %>% 
+  mutate(across(.cols = where(is.numeric), .fns = ~scale(.x)))
+```
 
+```{r}
+mod_log_norm <- glm(delayed ~ month + weekday + carrier + wind_dir + hour + 
+                      wind_speed + visib,
+                    data = all_EWR_log, 
+                    family = binomial(link = "logit"))
+```
+
+```{r}
+summary(mod_log_norm)
 ```
 
 --------------------------------------------------------------------------------
@@ -256,6 +271,43 @@ summary(mod_wind_dir)
 
 ```{r}
 autoplot(mod_wind_dir)
+```
+
+--------------------------------------------------------------------------------
+
+# RANDOM FOREST MODEL
+
+```{r}
+rf <- train(dep_delay ~., data =all_EWR_lin, 
+      method = "rf",
+      trControl = trainControl(method = "oob"),
+      importance = TRUE,
+      verbose = TRUE,
+      tuneGrid = data.frame(mtry = 2) )
+```
+
+```{r}
+rf2 <- randomForest(delayed ~., 
+                    data = all_EWR_log,
+                    ntree = 100)
+```
+
+```{r}
+rf_classifier <- ranger(delayed ~ ., 
+                        data = all_EWR_log,
+                        importance = "impurity",
+                        num.trees = 500,
+                        mtry = 2,
+                        min.node.size = 1)
+rf_classifier
+```
+
+```{r}
+ranger::importance(rf_classifier) %>% 
+broom::tidy() %>% 
+  arrange(desc(x)) %>% 
+  ggplot(aes(x = x, y = reorder(names, x))) +
+  geom_point()
 ```
 
 --------------------------------------------------------------------------------
