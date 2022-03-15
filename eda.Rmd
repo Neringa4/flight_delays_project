@@ -30,6 +30,12 @@ all_EWR %>%
 ```
 
 ```{r}
+all %>% 
+  ggplot(aes(x = delayed, fill = origin)) +
+  geom_bar(position = "dodge")
+```
+
+```{r}
 all_EWR %>% 
   filter(dep_delay >= 15) %>% 
   ggplot(aes(x = dep_delay)) +
@@ -320,3 +326,32 @@ all_EWR %>%
         axis.text = element_text(size = 10, colour = "white"))
 #ggsave("hourly_delay_percentage.png")
 ```
+
+```{r}
+percent_delayed_all <- all %>% 
+  group_by(origin, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(percent = round(n/sum(n)*100, digits = 2))
+```
+
+```{r}
+percent_delayed_all %>% 
+  ggplot(aes(x = delayed, y = percent, fill = origin)) +
+  geom_col(position = "dodge", width = 0.8, show.legend = FALSE) +
+  geom_hline(yintercept = 0, color = "black", size = 0.7) +
+  scale_x_discrete(labels = c("On Time", "Delayed")) +
+  scale_y_continuous(limits = c(0, 100)) +
+  scale_fill_manual(values=c("#55747E", "#191919", "#A7C5CD")) +
+  theme(axis.title = element_blank(),
+        axis.ticks = element_blank(),
+        axis.text = element_blank(),
+        legend.background = element_rect(fill = "#ecfafd"),
+        legend.title = element_blank(),
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        panel.grid.major.y = element_line(colour = "grey80"),  
+        panel.background = element_rect(fill = "#ecfafd"),
+        plot.background = element_rect(fill = "#ecfafd"))
+ggsave("all_delay_percentages.png")
+```
+
