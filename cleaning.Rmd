@@ -16,6 +16,12 @@ weather_raw <- read_csv("data/weather.csv")
 ```
 
 ```{r}
+flights_raw %>% 
+  group_by(origin) %>% 
+  summarise(n = n())
+```
+
+```{r}
 weather_raw %>%
   filter(origin == "EWR") %>% 
   summarise(across(.cols = everything(),
@@ -25,7 +31,14 @@ weather_raw %>%
 ```{r}
 weather_raw %>% 
   ggplot(aes(x = wind_speed, y = wind_gust)) +
-  geom_point()
+  geom_point() +
+  theme(panel.grid.minor = element_blank(),
+        panel.grid.major = element_line(colour = "#91ABB4"),
+        panel.background = element_rect(fill = "#65838D"),
+        plot.background = element_rect(fill = "#65838D")) +
+  theme(axis.ticks = element_blank(),
+        axis.text = element_text(size = 10, colour = "white"))
+ggsave("correlation.png")
 ```
 
 ```{r}
@@ -102,7 +115,8 @@ flights_EWR <- flights %>%
 
 ```{r}
 planes <- planes_raw %>% 
-  select(-speed)
+  select(-speed) %>% 
+  filter(year != 0)
 ```
 
 ```{r}
