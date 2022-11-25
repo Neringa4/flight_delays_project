@@ -88,6 +88,10 @@ all_EWR %>%
                 label = str_c(delay_percent, "%")), 
             data = hour_plot_text,
             size = 3)
+
+all_EWR %>% 
+  ggplot(aes(x = hour, fill = delayed)) +
+  geom_bar()
 ```
 
 ```{r}
@@ -210,6 +214,21 @@ all %>%
 
 ```{r}
 all_EWR %>% 
+  drop_na(wind_speed) %>% 
+  filter(wind_speed > 18) %>% 
+  summarise(n = n())
+```
+
+```{r}
+ all_EWR %>% 
+  group_by(visib, delayed) %>% 
+  summarise(n = n()) %>% 
+  mutate(delay_percent = round(n / sum(n) * 100)) %>% 
+  filter(delayed == TRUE)
+```
+
+```{r}
+all_EWR %>% 
   drop_na(visib) %>%
   ggplot(aes(x = delayed, y = visib)) +
   geom_boxplot()
@@ -228,10 +247,8 @@ all_EWR %>%
 ```{r}
 all_EWR %>% 
   drop_na(visib) %>% 
-  mutate(visib_less_10 = if_else(visib < 10, TRUE, FALSE)) %>% 
-  group_by(visib_less_10) %>% 
-  summarise(n = n()) %>% 
-  mutate(n/sum(n))
+  filter(visib < 2) %>% 
+  summarise(n = n())
 ```
 
 ```{r}

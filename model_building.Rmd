@@ -94,6 +94,20 @@ summary(mod_log)
 ```
 
 ```{r}
+tibble(hour = 5, month = "August", weekday = "Monday", carrier = "AS", wind_dir = "N", wind_speed = 10, visib = 10) %>%
+  modelr::add_predictions(mod_log, type='response') %>%
+  mutate(odds = pred/(1-pred)) %>%
+  select(odds)
+```
+
+```{r}
+broom::tidy(mod_log) %>% 
+  filter(term == "carrierB6") %>% 
+  select(estimate) %>% 
+  exp()
+```
+
+```{r}
 log_mod_pred <- all_EWR_log %>% 
   add_predictions(mod_log, type = "response")
 ```
@@ -328,4 +342,3 @@ broom::tidy() %>%
         axis.text.x = element_text(size = 10, colour = "grey10"))
 #ggsave("variable_importance.png")
 ```
-

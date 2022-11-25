@@ -77,6 +77,20 @@ flights_raw %>%
   filter(dest == "EWR")
 ```
 
+```{r}
+weather_raw %>% 
+  drop_na(wind_speed) %>% 
+  filter(wind_speed > 18) %>% 
+  summarise(n = n())
+```
+
+```{r}
+weather_raw %>% 
+  drop_na(visib) %>% 
+  filter(visib < 10) %>% 
+  summarise(n = n())
+```
+
 --------------------------------------------------------------------------------
 
 # CLEANING
@@ -162,9 +176,13 @@ all <- flights %>%
 
 ```{r}
 all_EWR <- flights_EWR %>% 
+  drop_na() %>% 
   left_join(airlines, by = "carrier") %>% 
+  drop_na() %>% 
   left_join(weather_EWR, by = "time_hour") %>% 
-  left_join(planes, by = "tailnum")
+  drop_na() %>% 
+  left_join(planes, by = "tailnum") %>% 
+  drop_na()
 ```
 
 --------------------------------------------------------------------------------
